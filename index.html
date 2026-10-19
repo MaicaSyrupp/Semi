@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Home | My Portfolio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">My Portfolio</a>
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <a href="#about">About</a>
+        <a href="#skills">Skills</a>
+        <a href="#education">Education</a>
+        <span id="nav-auth"></span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="container">
+        <div id="avatar"></div>
+        <div>
+          <p>Hello, I'm</p>
+          <h1 id="p-name"></h1>
+          <p id="p-tagline"></p>
+          <p><strong id="p-program"></strong> &middot; <span id="p-section"></span></p>
+          <p id="p-school"></p>
+          <a href="#about" class="btn">About Me</a>
+          <a href="register.html" class="btn btn-outline">Create an Account</a>
+        </div>
+      </div>
+    </section>
+
+    <section id="about">
+      <div class="container">
+        <h2 class="section-title">About Me</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Profile</h3>
+            <p id="p-about"></p>
+            <h3 style="margin-top:20px">Goals</h3>
+            <p id="p-goals"></p>
+          </div>
+          <div class="card">
+            <h3>Basic Information</h3>
+            <ul class="info-list" id="p-info"></ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="skills" style="background:#fff">
+      <div class="container">
+        <h2 class="section-title">Skills &amp; Hobbies</h2>
+        <div class="grid">
+          <div class="card">
+            <h3>Skills</h3>
+            <div class="tags" id="p-skills"></div>
+          </div>
+          <div class="card">
+            <h3>Hobbies &amp; Interests</h3>
+            <div class="tags" id="p-hobbies"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="education">
+      <div class="container">
+        <h2 class="section-title">Education</h2>
+        <div class="card">
+          <ul class="timeline" id="p-education"></ul>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div class="container">&copy; <span id="year"></span> <span id="f-name"></span> &middot; Semi-Final Examination — Web Development</div>
+  </footer>
+
+  <script src="js/profile.js"></script>
+  <script src="js/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const initials = PROFILE.name.split(/\s+/).map((w) => w[0]).slice(0, 2).join("").toUpperCase();
+    $("avatar").outerHTML = PROFILE.photo
+      ? `<img class="avatar" src="${escapeHtml(PROFILE.photo)}" alt="${escapeHtml(PROFILE.name)}" />`
+      : `<div class="avatar">${escapeHtml(initials)}</div>`;
+    $("p-name").textContent = PROFILE.name;
+    $("f-name").textContent = PROFILE.name;
+    $("p-tagline").textContent = PROFILE.tagline;
+    $("p-program").textContent = PROFILE.program;
+    $("p-section").textContent = PROFILE.section;
+    $("p-school").textContent = PROFILE.school;
+    $("p-about").textContent = PROFILE.about;
+    $("p-goals").textContent = PROFILE.goals;
+    $("p-info").innerHTML = [["Name", PROFILE.name], ["Program", PROFILE.program], ["Section", PROFILE.section], ...PROFILE.info]
+      .map(([k, v]) => `<li><span>${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></li>`).join("");
+    $("p-skills").innerHTML = PROFILE.skills.map((s) => `<span class="tag">${escapeHtml(s)}</span>`).join("");
+    $("p-hobbies").innerHTML = PROFILE.hobbies.map((s) => `<span class="tag">${escapeHtml(s)}</span>`).join("");
+    $("p-education").innerHTML = PROFILE.education
+      .map(([level, school, years]) => `<li><strong>${escapeHtml(level)}</strong><br>${escapeHtml(school)}<br><small>${escapeHtml(years)}</small></li>`).join("");
+    $("year").textContent = new Date().getFullYear();
+    document.title = `${PROFILE.name} | Home`;
+  </script>
+</body>
+</html>

@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin Panel | My Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">My Portfolio</a>
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <span id="nav-auth"></span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="dash-header">
+      <div class="container">
+        <h1>Admin Panel</h1>
+        <p>Welcome, <strong id="a-name"></strong> <span class="badge badge-admin">Admin</span></p>
+      </div>
+    </div>
+    <section>
+      <div class="container">
+        <div id="alert" class="alert"></div>
+        <div class="stats">
+          <div class="card stat"><div class="num" id="s-total">0</div>Total Accounts</div>
+          <div class="card stat"><div class="num" id="s-users">0</div>User Accounts</div>
+          <div class="card stat"><div class="num" id="s-admins">0</div>Admin Accounts</div>
+        </div>
+        <div class="card">
+          <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:16px">
+            <h3 style="margin:0">Registered Accounts</h3>
+            <a href="register.html?type=admin" class="btn btn-small">+ Register New Account</a>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>Username</th><th>Full Name</th><th>Email</th><th>Type</th><th>Registered</th><th>Action</th></tr></thead>
+              <tbody id="a-table"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="container">Semi-Final Examination — Web Development</div></footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const admin = requireRole("admin");
+    function render() {
+      const users = loadUsers();
+      document.getElementById("s-total").textContent = users.length;
+      document.getElementById("s-users").textContent = users.filter((u) => u.role === "user").length;
+      document.getElementById("s-admins").textContent = users.filter((u) => u.role === "admin").length;
+      document.getElementById("a-table").innerHTML = users.map((u) => `
+        <tr>
+          <td>${escapeHtml(u.username)}</td>
+          <td>${escapeHtml(u.fullName)}</td>
+          <td>${escapeHtml(u.email || "—")}</td>
+          <td><span class="badge badge-${u.role}">${u.role}</span></td>
+          <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+          <td>${u.isDefault || u.username === admin.username
+            ? '<small style="color:var(--muted)">Protected</small>'
+            : `<button class="btn btn-small btn-danger" data-del="${escapeHtml(u.username)}">Delete</button>`}</td>
+        </tr>`).join("");
+    }
+    if (admin) {
+      document.getElementById("a-name").textContent = admin.fullName;
+      if (new URLSearchParams(location.search).get("created")) {
+        const a = document.getElementById("alert");
+        a.className = "alert alert-success show";
+        a.textContent = "Account created successfully.";
+      }
+      document.getElementById("a-table").addEventListener("click", (e) => {
+        const name = e.target.dataset.del;
+        if (name && confirm(`Delete account "${name}"?`)) {
+          deleteAccount(name);
+          render();
+        }
+      });
+      // auth.js creates the default admin asynchronously on first visit.
+      ensureDefaultAdmin().then(render);
+    }
+  </script>
+</body>
+</html>

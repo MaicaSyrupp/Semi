@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Register | My Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">My Portfolio</a>
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <span id="nav-auth"></span>
+      </nav>
+    </div>
+  </header>
+
+  <main class="auth-wrap">
+    <div class="card auth-card">
+      <h2>Create an Account</h2>
+      <p class="sub">Register a User or Admin account</p>
+      <div id="alert" class="alert"></div>
+      <form id="register-form" novalidate>
+        <div class="form-group">
+          <label for="role">Account Type</label>
+          <select id="role">
+            <option value="user">User Account</option>
+            <option value="admin">Admin Account</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="fullName">Full Name</label>
+          <input id="fullName" required />
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input id="email" type="email" />
+        </div>
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input id="username" autocomplete="username" required />
+        </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input id="password" type="password" autocomplete="new-password" required />
+        </div>
+        <div class="form-group">
+          <label for="confirm">Confirm Password</label>
+          <input id="confirm" type="password" autocomplete="new-password" required />
+        </div>
+
+        <div id="admin-auth" hidden>
+          <p class="hint">Creating an Admin account must be authorized by an existing administrator.</p>
+          <div class="form-group">
+            <label for="authUser">Authorizing Admin Username</label>
+            <input id="authUser" />
+          </div>
+          <div class="form-group">
+            <label for="authPass">Authorizing Admin Password</label>
+            <input id="authPass" type="password" />
+          </div>
+        </div>
+
+        <button class="btn btn-block" type="submit">Register</button>
+      </form>
+      <p class="form-footer">Already have an account? <a href="login.html">Login here</a></p>
+    </div>
+  </main>
+
+  <footer><div class="container">Semi-Final Examination — Web Development</div></footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const $ = (id) => document.getElementById(id);
+    const alertBox = $("alert");
+    const showError = (msg) => { alertBox.className = "alert alert-error show"; alertBox.textContent = msg; };
+
+    // A logged-in admin doesn't need to re-enter credentials to authorize.
+    const me = currentUser();
+    const loggedInAdmin = me && me.role === "admin";
+    if (new URLSearchParams(location.search).get("type") === "admin") $("role").value = "admin";
+    const syncRole = () => { $("admin-auth").hidden = $("role").value !== "admin" || loggedInAdmin; };
+    $("role").addEventListener("change", syncRole);
+    syncRole();
+
+    $("register-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const role = $("role").value;
+      if ($("password").value !== $("confirm").value) return showError("Passwords do not match.");
+      try {
+        if (role === "admin" && !loggedInAdmin) {
+          await ensureDefaultAdmin();
+          const authName = $("authUser").value.trim().toLowerCase();
+          const authHash = await hashPassword($("authPass").value);
+          const ok = loadUsers().some((u) => u.role === "admin" && u.username === authName && u.passwordHash === authHash);
+          if (!ok) return showError("Admin authorization failed. Enter a valid administrator username and password.");
+        }
+        await registerAccount({
+          username: $("username").value,
+          fullName: $("fullName").value,
+          email: $("email").value,
+          password: $("password").value,
+          role,
+        });
+        location.href = loggedInAdmin ? "admin.html?created=1" : "login.html?registered=1";
+      } catch (err) {
+        showError(err.message);
+      }
+    });
+  </script>
+</body>
+</html>
