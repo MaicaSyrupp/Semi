@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard | My Portfolio</title>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="navbar">
+    <div class="container">
+      <a href="index.html" class="brand">My Portfolio</a>
+      <button class="nav-toggle" aria-label="Toggle menu">&#9776;</button>
+      <nav class="nav-links">
+        <a href="index.html">Home</a>
+        <span id="nav-auth"></span>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="dash-header">
+      <div class="container">
+        <h1>Welcome, <span id="d-name"></span>!</h1>
+        <p>You are logged in as <span class="badge badge-user">User</span></p>
+      </div>
+    </div>
+    <section>
+      <div class="container grid">
+        <div class="card">
+          <h3>My Account</h3>
+          <ul class="info-list" id="d-info"></ul>
+        </div>
+        <div class="card">
+          <h3>User Access</h3>
+          <p>As a registered user you can:</p>
+          <ul style="margin:12px 0 20px 20px">
+            <li>View the personal home page and profile</li>
+            <li>View your own account details</li>
+            <li>Log out securely</li>
+          </ul>
+          <a href="index.html" class="btn">Visit Home Page</a>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer><div class="container">Semi-Final Examination — Web Development</div></footer>
+
+  <script src="js/auth.js"></script>
+  <script>
+    const user = requireRole("user");
+    if (user) {
+      if (user.role === "admin") location.replace("admin.html");
+      document.getElementById("d-name").textContent = user.fullName;
+      document.getElementById("d-info").innerHTML = [
+        ["Full Name", user.fullName],
+        ["Username", user.username],
+        ["Email", user.email || "—"],
+        ["Account Type", "User"],
+        ["Registered", new Date(user.createdAt).toLocaleString()],
+      ].map(([k, v]) => `<li><span>${escapeHtml(k)}</span><span>${escapeHtml(v)}</span></li>`).join("");
+    }
+  </script>
+</body>
+</html>
